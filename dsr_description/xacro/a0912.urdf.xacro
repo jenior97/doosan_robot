@@ -3,7 +3,7 @@
 
   <xacro:arg name="color"   default="white"/>
   <xacro:arg name="gripper" default="none"/>
-
+  <xacro:arg name="ns" default="dsr"/>
 
   <xacro:property name="cr" value="$(arg color)"/>
   <xacro:property name="gr" value="$(arg gripper)"/>
@@ -14,7 +14,7 @@
   <xacro:if value="${cr == 'blue'}">
      <xacro:include filename="$(find dsr_description)/xacro/macro.a0912.blue.xacro" />
   </xacro:if>
-  <xacro:a0912 namespace="$(arg namespace)"/>
+  <xacro:a0912 namespace="$(arg ns)"/>
 
   <link name="world" />
   <xacro:if value="${gr == 'robotiq_2f'}">

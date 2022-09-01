@@ -4,7 +4,7 @@
     <arg name="host" default="127.0.0.1"/>
 	<arg name="port" default="12345"/>
     <arg name="mode" default="virtual"/>
-    <arg name="model" default="m1013"/>
+    <arg name="model" default="a0912"/>
     <arg name="color" default="white"/>
     <arg name="gripper" default="none"/>
     <arg name="mobile" default="none"/>

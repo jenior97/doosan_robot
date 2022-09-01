@@ -1,0 +1,26 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/juju/catkin_ws/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/juju/catkin_ws/src/doosan-robot/common/include/**",
+        "/home/juju/catkin_ws/src/doosan-robot/dsr_control/include/**",
+        "/home/juju/catkin_ws/src/realsense-ros/realsense2_camera/include/**",
+        "/home/juju/catkin_ws/src/ros_tutorials_service/include/**",
+        "/home/juju/catkin_ws/src/ros_tutorials_topic/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

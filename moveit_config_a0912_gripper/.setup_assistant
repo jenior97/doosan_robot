@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: dsr_description
+    relative_path: xacro/a0912_140gripper.urdf.xacro
+    xacro_args: ""
+  SRDF:
+    relative_path: config/dsr.srdf
+  CONFIG:
+    author_name: juju0111
+    author_email: p3549823@gmail.com
+    generated_timestamp: 1657783500

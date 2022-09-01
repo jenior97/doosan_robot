@@ -1,0 +1,26 @@
+# by bcc
+
+controller_manager_ns: /
+controller_list:
+ - name: dsr_joint_trajectory_controller
+   rate: 20
+   r: 20
+   publish_rate: 20
+   update_rate_: 20
+   loop_rate_: 50
+   action_ns: follow_joint_trajectory
+   type: FollowJointTrajectory
+   default: true
+   joints:
+     - joint1
+     - joint2
+     - joint3
+     - joint4
+     - joint5
+     - joint6
+     - robotiq_85_left_knuckle_joint
+
+initial:  # Define initial robot poses.
+  - group: arm
+    pose: home
+# ends

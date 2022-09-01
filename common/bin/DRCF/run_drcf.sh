@@ -13,4 +13,4 @@ echo "robot model:" "$2"
 
 cd "$(dirname "$0")" 
 
-./DRCF64 $1 $2
+sudo ./DRCF64 $1 $2
