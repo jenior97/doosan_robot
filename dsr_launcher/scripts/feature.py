@@ -99,7 +99,7 @@ class featuremapping(object):
         4. distance between eef and user
         '''       
 
-        TABLE_HEIGHT = 0.72
+        TABLE_HEIGHT = 0.72 ########################################### initial condition setting?
         eef_height = 0
         t_distance_to_laptop = 0
         moving_distance = 0
@@ -148,19 +148,26 @@ def main():
 
     # choose one sample trajectory
 
-    planning_trajectory = np.load("/home/kim/catkin_ws/src/doosan-robot/dsr_launcher/scripts/sampled_trajectories/mid_trajectory/mid_trajectory_{num}.npz".format(num = 1), allow_pickle=True)['plan']
+    feature = []
 
-    get_feature_map = featuremapping()
-    features = get_feature_map.get_feature(planning_trajectory = planning_trajectory)   
+    for i in range(1,11):
+       
+        planning_trajectory = np.load("/home/kim/catkin_ws/src/doosan-robot/dsr_launcher/scripts/sampled_trajectories/mid_trajectory/mid_trajectory_{num}.npz".format(num = i), allow_pickle=True)['plan']
+
+        get_feature_map = featuremapping()
+        features = get_feature_map.get_feature(planning_trajectory = planning_trajectory)   
     
-    print('end_effectors height : {}, distance between eef and laptop : {} moving distance : {} distance between eef and user : {} '.format(features[0], features[1], features[2], features[3]))
+        print('end_effectors height : {}, distance between eef and laptop : {} moving distance : {} distance between eef and user : {} '.format(features[0], features[1], features[2], features[3]))
+
+        feature.append(features)
 
     # feature sum
 
-    features_sum = np.sum(features)
+        features_sum = np.sum(features)
 
-    print('sum of featuremap : {}'.format(features_sum))
+        print('sum of featuremap : {}'.format(features_sum))
 
+    print(feature)
     
     
 
