@@ -130,14 +130,19 @@ def main():
         mid_trajectory = list()
 
         random_pose = copy.deepcopy(mid_point)
-        random_pose[0] += np.random.uniform(-0.2,0)
-        random_pose[1] += np.random.uniform(-0.2,0)
-        random_pose[2] += np.random.uniform(-0.2,0)
+        random_pose[0] += np.random.uniform(-0.3,0.5)
+        random_pose[1] += np.random.uniform(-0.3,-0.1)
+        random_pose[2] += np.random.uniform(-0.3,0.3)
 
         plan = planning.arm_cartesian_plan(object_pose = random_pose, approach_direction = 'vertical')
         mid_trajectory = plan
         raw_input()
 
+
+        random_pose = copy.deepcopy(mid_point)
+        random_pose[0] += np.random.uniform(-0.1,0.1)
+        random_pose[1] += np.random.uniform(-0.1,0.1)
+        random_pose[2] += np.random.uniform(-0.1,0.1)
 
         plan = planning.arm_cartesian_plan(object_pose = mid_point , approach_direction = 'vertical')
         mid_trajectory = mid_trajectory + plan
@@ -145,11 +150,16 @@ def main():
 
 
         random_pose = copy.deepcopy(mid_point)
-        random_pose[0] += np.random.uniform(0,0.2)
-        random_pose[1] += np.random.uniform(0,0.2)
-        random_pose[2] += np.random.uniform(0,0.2)
+        random_pose[0] += np.random.uniform(-0.3,0.5)
+        random_pose[1] += np.random.uniform(0.1,0.3)
+        random_pose[2] += np.random.uniform(-0.3,0.3)
 
         plan = planning.arm_cartesian_plan(object_pose = random_pose, approach_direction = 'vertical')
+        mid_trajectory = mid_trajectory + plan
+        raw_input()
+
+
+        plan = planning.arm_cartesian_plan(object_pose = [0.75 , 0.3 , 0.4])
         mid_trajectory = mid_trajectory + plan
         raw_input()
 

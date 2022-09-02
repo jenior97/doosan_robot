@@ -131,7 +131,6 @@ class control(object):
         return
 
 
-
 ###########################################################################################
 
 
@@ -237,7 +236,7 @@ class control(object):
         waypoints.append(self.pose_goal)
 
         # computing cartesian path
-        plan, _ = self.arm_move_group.compute_cartesian_path(waypoints, 0.001, 0.0)
+        plan, _ = self.arm_move_group.compute_cartesian_path(waypoints, 0.01, 0.0)
         
         current_position = plan.joint_trajectory.points[-1].positions
         

@@ -1,136 +1,166 @@
-from moveit_commander.robot import RobotCommander
+#!/usr/bin/env python
+
+
+import sys
+import moveit_commander
 import rospy
-import control_planning_scene
-import ur5e_plan
-import ur5e_get_fk
+import environment
+import control
+import fk
 import numpy as np
-from sensor_msgs.msg import JointState
-
-from test_mesh_pickandplace import create_environment
-import os
-
-
-
-
-
-
-
+from moveit_msgs.srv import GetPlanningScene, GetPlanningSceneRequest
+from moveit_msgs.srv import ApplyPlanningScene, ApplyPlanningSceneRequest
+from moveit_msgs.msg import CollisionObject, PlanningScene
 
 
 class featuremapping(object):
-    def __init__(self, planning_scene_1):
-        super(featuremapping, self).__init__()
-        #rospy.init_node("test_fk", anonymous=False)
-        self.rc = RobotCommander()
-        self.planning_scene_1 = planning_scene_1
-        self.planning_ur5e = ur5e_plan.ur5e_plan()
-        self.getfk = ur5e_get_fk.GetFK('ee_link', 'world')
-        self.ur5e_js = self.planning_scene_1.get_current_joint_state()
 
-    def compute_feature_map(self, step):
+    def __init__(self):
+        
+        super(featuremapping, self).__init__()
+
+        moveit_commander.roscpp_initialize(sys.argv)        
+        rospy.init_node("test_fk", anonymous=False)
+        
+        self.robot = moveit_commander.robot.RobotCommander()
+
+        self.get_ps_srv = self._get_planning_response()
+        self.get_planning_scene = self._get_planning_response_call(self.get_ps_srv).scene
+        
+        self.apply_ps_srv = rospy.ServiceProxy('apply_planning_scene', ApplyPlanningScene)
+
+        self.environment = environment.environment()
+        self.getfk = fk.GetFK('link6', 'world')
+        self.joint_state = self.get_planning_scene.robot_state.joint_state
+
+
+
+
+#############################################################################################
+
+    def _get_planning_response(self):
+
+        get_ps_srv = rospy.ServiceProxy('/dsr01a0912/get_planning_scene', GetPlanningScene())
+        return get_ps_srv
+
+
+    def _get_planning_response_call(self, get_ps_srv):
+
+        get_req_ = GetPlanningSceneRequest()
+        get_ps_srv.wait_for_service(0.5)
+        return get_ps_srv.call(get_req_)
+
+
+    def set_joint_state_to_neutral_pose(self, neutral_pose=[0]):
+
+        current_position = np.array(self.get_planning_scene.robot_state.joint_state.position)
+        current_position[:6] = neutral_pose
+        self.get_planning_scene.robot_state.joint_state.position = current_position
+
+
+    def _update_planning_scene(self, ps = PlanningScene):
+        ps.is_diff = True   
+        ps.robot_state.is_diff = True
+
+        apply_req = ApplyPlanningSceneRequest()
+        apply_req.scene = ps
+
+        self.apply_ps_srv.call(apply_req)
+
+        return
+
+
+###########################################################################################
+
+
+
+    def get_feature(self, planning_trajectory):
+
+
+        table, box, laptop, visualhuman = self.environment.object_co()
+        
+        self.object_position = np.zeros(3)
+        self.object_position[0] = laptop.mesh_poses[0].position.x
+        self.object_position[1] = laptop.mesh_poses[0].position.y
+        self.object_position[2] = laptop.mesh_poses[0].position.z
+        
+        self.user_position = np.zeros(3)
+        self.user_position[0] = visualhuman.mesh_poses[0].position.x
+        self.user_position[1] = visualhuman.mesh_poses[0].position.y
+        self.user_position[2] = visualhuman.mesh_poses[0].position.z + 0.1 ####################### 0.1 meaning?
+
+
         feature_mapping = np.zeros(4)
-        TABLE_HEIGHT = 0.8
+
+        '''
+        1. end_effector's height
+        2. distance between eef and laptop
+        3. moving distance
+        4. distance between eef and user
+        '''       
+
+        TABLE_HEIGHT = 0.72
         eef_height = 0
         t_distance_to_laptop = 0
         moving_distance = 0
         t_distance_to_user = 0 
         previous_position = np.zeros(3)
-        
-        for p in step:
             
+        for i in range(len(planning_trajectory)):
             
             joint_position = np.zeros(12)
-            joint_position[:6] = p
-            self.planning_scene_1.get_planning_scene.robot_state.joint_state.position = joint_position
-            eef_position = self.getfk.get_fk(self.ur5e_js)
+            joint_position[:6] = planning_trajectory[i]
+
+            self.get_planning_scene.robot_state.joint_state.position = joint_position
+            eef_position = self.getfk.get_fk(self.joint_state)
             
-            distance_to_laptop = np.linalg.norm(eef_position-self.object_position)
-            distance_to_user = np.linalg.norm(eef_position-self.user_position)
+            distance_to_laptop = np.linalg.norm(eef_position - self.object_position)
+            distance_to_user = np.linalg.norm(eef_position - self.user_position)
             
             t_distance_to_laptop += distance_to_laptop
             t_distance_to_user += distance_to_user
-            eef_height += eef_position[2] - TABLE_HEIGHT
+
+            eef_height += eef_position[2] - TABLE_HEIGHT ######################## eef_height = np.max(eef_position) - table_height
+            
             if np.sum(previous_position) != 0:
                 moving_distance += np.linalg.norm(eef_position - previous_position) 
                     
             previous_position = eef_position
             
             
-        eef_height/=len(step)
-        t_distance_to_laptop/=len(step)
-        t_distance_to_user/=len(step)
+        eef_height /= len(planning_trajectory) 
+        t_distance_to_laptop /= len(planning_trajectory)
+        t_distance_to_user /= len(planning_trajectory)
+
         feature_mapping[0] = eef_height
         feature_mapping[1] = t_distance_to_laptop
         feature_mapping[2] = moving_distance
         feature_mapping[3] = t_distance_to_user
         
+
         return feature_mapping
         
-    def get_feature(self, objects_co, planning_trajectory = None):
-        
-        '''
-        1. end_effector's height
-        2. distance between eef and laptop
-        3. moving distance
-        4. distance between eef and user
-        '''
 
 
-        t_feature_mapping = np.zeros(4)        
-        
-
-        #env, grasp_point, approach_direction, objects_co, neutral_position = create_environment(self.planning_scene_1)
-        
-        
-        
-        self.object_position = np.zeros(3)
-        self.object_position[0] = objects_co['laptop'].mesh_poses[0].position.x
-        self.object_position[1] = objects_co['laptop'].mesh_poses[0].position.y
-        self.object_position[2] = objects_co['laptop'].mesh_poses[0].position.z
-        
-        self.user_position = np.zeros(3)
-        self.user_position[0] = objects_co['visualhuman'].mesh_poses[0].position.x
-        self.user_position[1] = objects_co['visualhuman'].mesh_poses[0].position.y
-        self.user_position[2] = objects_co['visualhuman'].mesh_poses[0].position.z + 0.9
-
-        
-        if type(planning_trajectory) !=  list and type(planning_trajectory) != np.ndarray:
-            if planning_trajectory == None:
-                planning_trajectory = np.load('./sampled_trajectories/pick_trajectories.npz', allow_pickle=True)['plan']
-        #print(pick_trajectories.files[0])
-        for step in planning_trajectory:
-
-            if type(step) == list:
-                # trajectory의 feature map (mean value)
-                feature_mapping = self.compute_feature_map(step)
-                t_feature_mapping += feature_mapping
-                #print(feature_mapping)
-                
-            if type(step) == str:
-                #print(step)
-                pass
-         
-                
-        return  t_feature_mapping
     
     
 def main():
-    dir_path = os.path.dirname(os.path.abspath(__file__))
-    traj_path = os.path.join(dir_path,  'sampled_trajectories/planning_trajectory.npz')
-    
+
     # choose one sample trajectory
-    planning_trajectory = np.load(traj_path, allow_pickle=True)['plan'][0]
-    
-    print(len(planning_trajectory))
+
+    planning_trajectory = np.load("/home/kim/catkin_ws/src/doosan-robot/dsr_launcher/scripts/sampled_trajectories/mid_trajectory/mid_trajectory_{num}.npz".format(num = 1), allow_pickle=True)['plan']
+
     get_feature_map = featuremapping()
+    features = get_feature_map.get_feature(planning_trajectory = planning_trajectory)   
     
-    
-    print('end_effectors height' + 'distance between eef and laptop' + 'moving distance' + 'distance between eef and user')
-    features_sum = get_feature_map.get_feature(planning_trajectory=planning_trajectory)   
-    
-    # 각 step 에서 feature map values 들의 sum
-    print('sum of featuremap')
-    print(features_sum)
+    print('end_effectors height : {}, distance between eef and laptop : {} moving distance : {} distance between eef and user : {} '.format(features[0], features[1], features[2], features[3]))
+
+    # feature sum
+
+    features_sum = np.sum(features)
+
+    print('sum of featuremap : {}'.format(features_sum))
+
     
     
 
