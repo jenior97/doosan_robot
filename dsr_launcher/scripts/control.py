@@ -18,8 +18,7 @@ from moveit_msgs.msg import AttachedCollisionObject
 from shape_msgs.msg import SolidPrimitive, Plane, Mesh, MeshTriangle
 
 from moveit_msgs.msg import RobotState
-from geometry_msgs.msg import Pose
-from dsr_msgs.srv import Robotiq2FMove
+from dsr_msgs.srv import Robotiq2FMove,SerialSendData
 
 sys.dont_write_bytecode = True
 sys.path.append( os.path.abspath(os.path.join(os.path.dirname(__file__),"../../common/imp")) ) # get import path : DSR_ROBOT.py 
@@ -80,18 +79,17 @@ class control(object):
         self.apply_ps_srv = rospy.ServiceProxy('apply_planning_scene', ApplyPlanningScene)
 
 
-        self.srv_robotiq_2f_move = rospy.ServiceProxy('/dsr01a0912/gripper/robotiq_2f_move', Robotiq2FMove)
+        #self.srv_robotiq_2f_move = rospy.ServiceProxy('/dsr01a0912/gripper/robotiq_2f_move', Robotiq2FMove)
         #self.srv_robotiq_gripper_move = rospy.ServiceProxy('/robotiq_control_move', Robotiq2FMove)
-
-
+    
 
 #############################################################################################
 
-    def gripper_control(self,value):
+    #def gripper_control(self, value):
 
         # if value = 0.7 : open / value = 0 : close 
         
-        self.srv_robotiq_2f_move(0.7-value)
+        #self.srv_robotiq_2f_move(0.7-value)
         #self.srv_robotiq_gripper_move(0.7-value)
 
 
@@ -134,13 +132,27 @@ class control(object):
 ###########################################################################################
 
 
+
+    def joint_move(self, plan):
+
+        self.arm_move_group.plan(plan)
+        #self.arm_move_group.stop()
+
+        self.set_joint_state_to_neutral_pose(plan)
+        self._update_planning_scene(self.get_planning_scene)
+
+
+
+
     def initial_joint_pose(self):
 
         #self.arm_move_group.set_start_state_to_current_state()
         plan = self.arm_move_group.plan([0 , 0 , pi/2 , 0 , pi/2 , 0])
-        self.arm_move_group.stop()
+        #self.arm_move_group.stop()
         self.set_joint_state_to_neutral_pose([0 , 0 , pi/2 , 0 , pi/2 , 0])
         self._update_planning_scene(self.get_planning_scene)
+
+        self.arm_move_group.execute(plan, wait = True)
 
         plan_positions = []
         for i in range(len(plan.joint_trajectory.points)):
@@ -198,7 +210,7 @@ class control(object):
         for i in range(len(plan.joint_trajectory.points)):
             plan_positions.append(plan.joint_trajectory.points[i].positions)
 
-        return plan_positions
+        return plan, plan_positions
 
 
 
@@ -237,7 +249,8 @@ class control(object):
 
         # computing cartesian path
         plan, _ = self.arm_move_group.compute_cartesian_path(waypoints, 0.01, 0.0)
-        
+        self.arm_move_group.execute(plan , wait = True)
+
         current_position = plan.joint_trajectory.points[-1].positions
         
         self.set_joint_state_to_neutral_pose(current_position)
@@ -250,14 +263,6 @@ class control(object):
 
         return plan_positions
 
-
-
-    def display_trajectory(self, plan) :
-        
-        self.display_trajectory = moveit_msgs.msg.DisplayTrajectory()
-        self.display_trajectory.trajectory_start = self.robot.get_current_state()
-        self.display_trajectory.trajectory.append(plan)
-        self.display_trajectory_publisher.publish(display_trajectory);
 
 
 
@@ -293,9 +298,6 @@ class control(object):
     def release_hand(self, object):
 
         self.hand_move_group.detach_object(object)
-
-
-
 
 
     def attach_object(self, object):

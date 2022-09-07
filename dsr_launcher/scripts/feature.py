@@ -13,14 +13,14 @@ from moveit_msgs.srv import ApplyPlanningScene, ApplyPlanningSceneRequest
 from moveit_msgs.msg import CollisionObject, PlanningScene
 
 
-class featuremapping(object):
+class feature(object):
 
     def __init__(self):
         
-        super(featuremapping, self).__init__()
+        super(feature, self).__init__()
 
-        moveit_commander.roscpp_initialize(sys.argv)        
-        rospy.init_node("test_fk", anonymous=False)
+        #moveit_commander.roscpp_initialize(sys.argv)        
+        #rospy.init_node("feature", anonymous=False)
         
         self.robot = moveit_commander.robot.RobotCommander()
 
@@ -87,7 +87,7 @@ class featuremapping(object):
         self.user_position = np.zeros(3)
         self.user_position[0] = visualhuman.mesh_poses[0].position.x
         self.user_position[1] = visualhuman.mesh_poses[0].position.y
-        self.user_position[2] = visualhuman.mesh_poses[0].position.z + 0.1 ####################### 0.1 meaning?
+        self.user_position[2] = visualhuman.mesh_poses[0].position.z + 0.9 ####################### meaning?
 
 
         feature_mapping = np.zeros(4)
@@ -99,7 +99,7 @@ class featuremapping(object):
         4. distance between eef and user
         '''       
 
-        TABLE_HEIGHT = 0.72 ########################################### initial condition setting?
+        TABLE_HEIGHT = -0.105 ########################################### initial condition setting?
         eef_height = 0
         t_distance_to_laptop = 0
         moving_distance = 0
@@ -120,7 +120,7 @@ class featuremapping(object):
             t_distance_to_laptop += distance_to_laptop
             t_distance_to_user += distance_to_user
 
-            eef_height += eef_position[2] - TABLE_HEIGHT ######################## eef_height = np.max(eef_position) - table_height
+            eef_height += eef_position[2] - TABLE_HEIGHT 
             
             if np.sum(previous_position) != 0:
                 moving_distance += np.linalg.norm(eef_position - previous_position) 
@@ -148,26 +148,27 @@ def main():
 
     # choose one sample trajectory
 
-    feature = []
 
-    for i in range(1,11):
+    planning = control.control()
+    get_feature_map = feature()
+    
+    for i in range(123,124):
        
+        raw_input()
+
         planning_trajectory = np.load("/home/kim/catkin_ws/src/doosan-robot/dsr_launcher/scripts/sampled_trajectories/mid_trajectory/mid_trajectory_{num}.npz".format(num = i), allow_pickle=True)['plan']
 
-        get_feature_map = featuremapping()
         features = get_feature_map.get_feature(planning_trajectory = planning_trajectory)   
     
         print('end_effectors height : {}, distance between eef and laptop : {} moving distance : {} distance between eef and user : {} '.format(features[0], features[1], features[2], features[3]))
 
-        feature.append(features)
+        for j in range(len(planning_trajectory)) :
 
-    # feature sum
+            planning.joint_move(planning_trajectory[j])
 
-        features_sum = np.sum(features)
 
-        print('sum of featuremap : {}'.format(features_sum))
 
-    print(feature)
+    #print(feature)
     
     
 

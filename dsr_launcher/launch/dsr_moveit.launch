@@ -5,20 +5,31 @@
   <arg name="rviz"  default="true"/>
   <arg name="world" default="empty.world"/>  
   <arg name="ns"    default="dsr01"/>
+  
   <arg name="host" default="127.0.0.1"/>
-  <arg name="port" default="12345"/>
+  <!-- <arg name="host" default="192.168.127.100"/> -->
+
   <arg name="mode" default="virtual"/>
+  <arg name="sim" default="true"/>
+  <!-- <arg name="mode" default="real"/> -->
+  <!-- <arg name="sim" default="true" in a simulation mode/> -->
+  
+  <arg name="camera_use" default="false"/>
+  <!-- <arg name="camera_use" default="false"/> -->
+  
+
+  
+  <arg name="port" default="12345"/>
   <arg name="model" default="a0912"/>
   <arg name="color" default="white"/>
   <arg name="gripper" default="robotiq_2f"/>
   <arg name="mobile" default="none"/>
   <!--use moveit : controller=:trajectory / else: controller:=position-->
   <arg name="controller" default="trajectory"/>
-
-
-
-
-
+  
+  <!-- use robotiq_2f 140 gripper -->>
+  <arg name="comport" default="/dev/ttyUSB0" unless="$(arg sim)"/> 
+  <arg name="baud" default="115200" unless="$(arg sim)"/> 
 
   <!-- Spawn the arms. -->
   <!-- include file="$(find dsr_bringup)/launch/dsr_base.launch"-->
@@ -31,15 +42,17 @@
     <arg name="color"         value="$(arg color)"/>
     <arg name="gripper"       value="$(arg gripper)"/>
     <arg name="mobile"        value="$(arg mobile)"/>
-    <arg name="controller"        value="$(arg controller)"/>
+    <arg name="controller"    value="$(arg controller)"/>
 
     <arg name="x"             value="0"/>
     <arg name="y"             value="0"/>
     <arg name="yaw"           value="0"/>
   </include>
+
+    
   <!-- model에 따른 moveit 실행 -->
   <group if="$(eval arg('model') == 'm0609')">
-      <include file="$(find moveit_config_m0609)/launch/m0609.launch" ns="dsr01$(arg model)">
+      <include file="$(find moveit_config_m0609)/launch/m0609.launch" ns="dsr01$(arg model)" >
           <arg name="fake_execution" value="false"/>
           <arg name="color" value="$(arg color)"/>
       </include>
@@ -103,23 +116,36 @@
       </include>
   </group-->
 
-  <group if="$(eval arg('model') == 'a0912')">
-      <include file="$(find moveit_config_a0912_gripper)/launch/demo.launch" ns="dsr01$(arg model)">
-          <arg name="fake_execution" value="false"/>
-          <arg name="color" value="$(arg color)"/>
-      </include>
+    <group if="$(eval arg('model') == 'a0912')">
 
+        <include file="$(find moveit_config_a0912_gripper)/launch/demo.launch" ns="dsr01$(arg model)" >
+            <arg name="fake_execution" value="false"/>
+            <arg name="color" value="$(arg color)"/>
+        </include>
 
+        <!-- <include file="$(find moveit_config_a0912_gripper_camera)/launch/demo.launch" ns="dsr01$(arg model)">
+            <arg name="fake_execution" value="false"/>
+            <arg name="color" value="$(arg color)"/>
+        </include> -->
+            
+        <!-- gripper Control -->
+        <!-- Launch action server for gripper -->
+        <include file="$(find robotiq_2f_gripper_control)/launch/robotiq_action_server.launch">
+            <arg name="comport" value="$(arg comport)" unless="$(arg sim)"/>
+            <arg name="baud" value="$(arg baud)" unless="$(arg sim)"/>
+            <arg name="stroke" value="0.140"/>
+            <arg name="joint_name" value="robotiq_85_left_knuckle_joint"/>
+            <arg name="verbose" value="true"/>
+            <arg name="sim" value="$(arg sim)"/>
+        </include>
 
+        <!-- Launch action client example  -->
+        <node pkg="robotiq_2f_gripper_control" type="robotiq_2f_action_client_example_class.py" 
+            name="robotiq_140_client" output="screen">
+            <param name="action_name" value="command_robotiq_action" />
+        </node>
+    </group>
 
-      <include file="$(find moveit_config_a0912_gripper)/launch/planning_context.launch">
-          <arg name="load_robot_description" value="true"/>
-
-
-
-
-      </include>
-  </group>
 
 
   <group if="$(eval arg('model') == 'h2017')">
@@ -136,7 +162,9 @@
       </include>
   </group>
   
-
+  
+  
+  
   
   <!-- View in RVIZ. -->
   <!--group if="$(arg rviz)"-->

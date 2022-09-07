@@ -6,6 +6,7 @@ import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
 import trimesh
+import numpy as np
 
 from moveit_msgs.srv import GetPlanningScene, GetPlanningSceneRequest
 from moveit_msgs.srv import ApplyPlanningScene, ApplyPlanningSceneRequest
@@ -219,9 +220,9 @@ class environment(object):
 
     def object_co(self):
 
-        table,_ = self.add_box(position_x = 1.035, position_z = -0.465, size = (1.2,1.4,0.72), box_name = 'table') 
-        box,_ = self.add_box(position_x = 1.035, position_y = -0.3, position_z = -0.055, size = (0.1,0.1,0.1), box_name = 'box')
-        laptop,_ = self.add_mesh(position_x = 1.035 , position_z = -0.055 , size = (0.1,0.1,0.1) , mesh_name = 'laptop')
+        table,_ = self.add_box(position_x = 1.025, position_z = -0.465, size = (1.2,1.4,0.72), box_name = 'table') 
+        box,_ = self.add_box(position_x = 0.7, position_y = -0.3, position_z = -0.055, size = (0.1,0.1,0.1), box_name = 'box')
+        laptop,_ = self.add_mesh(position_x = 1.025 , position_z = -0.055 , size = (0.1,0.1,0.1) , mesh_name = 'laptop')
         visualhuman,_ = self.add_mesh(position_x = 1.8 , position_z = -0.25 , orientation_x = -0.5, orientation_y = 0.5, orientation_z = 0.5, orientation_w = -0.5, size = (0.5,0.5,0.5) , mesh_name = 'visualhuman')
 
         self.scene.clear()

@@ -32,11 +32,11 @@ def main():
     setup = environment.environment()
 
 
-    alpha = 0.01
+    alpha = 0
 
     table,_ = setup.add_box(position_x = alpha + 1.025, position_z = -0.465, size = (1.2,1.4,0.72), box_name = 'table') 
     print("============== Table in the scene ===============")
-    box,_ = setup.add_box(position_x = alpha + 1.025, position_y = -0.3, position_z = -0.055, size = (0.1,0.1,0.1), box_name = 'box')
+    box,_ = setup.add_box(position_x = alpha + 0.7, position_y = -0.3, position_z = -0.055, size = (0.1,0.1,0.1), box_name = 'box')
     print("============== Box in the scene ===============")
     laptop,_ = setup.add_mesh(position_x = alpha + 1.025 , position_z = -0.055 , size = (0.1,0.1,0.1) , mesh_name = 'laptop')
     print("============== Laptop in the scene ===============")
@@ -70,25 +70,26 @@ def main():
 
     plan = planning.initial_joint_pose()
     pick_trajectory = plan
+    
     raw_input()
 
     ## pick
 
-    plan = planning.arm_cartesian_plan(object_pose = [1.035 , -0.3 , 0.3])
+    plan = planning.arm_cartesian_plan(object_pose = [0.7 , -0.3 , 0.3])
     pick_trajectory = pick_trajectory + plan
     raw_input()
 
-    plan = planning.arm_cartesian_plan(object_pose = [1.035 , -0.3 , 0.1])
+    plan = planning.arm_cartesian_plan(object_pose = [0.7 , -0.3 , 0.2])
     pick_trajectory = pick_trajectory + plan
     raw_input()
 
 
     ## close gripper
 
-    planning.attach_object(object = box)
+    #planning.attach_object(object = box)
     raw_input()
 
-    #planning.gripper_control(0)
+    #planning.gripper_control(value = 0)
 
     ## up
 
@@ -125,14 +126,14 @@ def main():
 
     mid_point = [0.516021273967, 0.0390030718983, 0.630885729686]
 
-    for i in range(1, 11):
+    for i in range(1):
 
         mid_trajectory = list()
 
         random_pose = copy.deepcopy(mid_point)
-        random_pose[0] += np.random.uniform(-0.3,0.5)
-        random_pose[1] += np.random.uniform(-0.3,-0.1)
-        random_pose[2] += np.random.uniform(-0.3,0.3)
+        random_pose[0] += np.random.uniform(-0.5,0.5)
+        random_pose[1] += np.random.uniform(-0.4,-0.2)
+        random_pose[2] += np.random.uniform(-0.4,0.3)
 
         plan = planning.arm_cartesian_plan(object_pose = random_pose, approach_direction = 'vertical')
         mid_trajectory = plan
@@ -140,9 +141,9 @@ def main():
 
 
         random_pose = copy.deepcopy(mid_point)
-        random_pose[0] += np.random.uniform(-0.1,0.1)
-        random_pose[1] += np.random.uniform(-0.1,0.1)
-        random_pose[2] += np.random.uniform(-0.1,0.1)
+        random_pose[0] += np.random.uniform(-0.3,0.5)
+        random_pose[1] += np.random.uniform(-0.2,0.2)
+        random_pose[2] += np.random.uniform(-0.4,0.3)
 
         plan = planning.arm_cartesian_plan(object_pose = mid_point , approach_direction = 'vertical')
         mid_trajectory = mid_trajectory + plan
@@ -151,8 +152,8 @@ def main():
 
         random_pose = copy.deepcopy(mid_point)
         random_pose[0] += np.random.uniform(-0.3,0.5)
-        random_pose[1] += np.random.uniform(0.1,0.3)
-        random_pose[2] += np.random.uniform(-0.3,0.3)
+        random_pose[1] += np.random.uniform(0.2,0.4)
+        random_pose[2] += np.random.uniform(-0.4,0.3)
 
         plan = planning.arm_cartesian_plan(object_pose = random_pose, approach_direction = 'vertical')
         mid_trajectory = mid_trajectory + plan
@@ -182,24 +183,24 @@ def main():
 
     ## place
 
-    plan = planning.arm_cartesian_plan(object_pose = [1.035, 0.3, 0.3])
+    plan = planning.arm_cartesian_plan(object_pose = [0.7, 0.3, 0.3])
     place_trajectory = plan
     raw_input()
 
-    plan = planning.arm_cartesian_plan(object_pose = [1.035, 0.3, 0.1])
+    plan = planning.arm_cartesian_plan(object_pose = [0.7, 0.3, 0.2])
     place_trajectory = place_trajectory + plan    
     raw_input()
 
-    pose = list_to_pose([1.035, 0.3, -0.055, 0, 0, 0, 1])
+    pose = list_to_pose([0.7, 0.3, -0.055, 0, 0, 0, 1])
     box.primitive_poses = [pose]
 
     
     ## open gripper
 
-    planning.detach_object(object = box)
+    #planning.detach_object(object = box)
     raw_input()
 
-    #planning.gripper_control(0.7)
+    #planning.gripper_control(value = 0.7)
 
     
     ## up
@@ -242,7 +243,7 @@ def main():
 
     back_to_initial_trajectory = np.array(back_to_initial_trajectory , dtype=object)
     
-    np.savez("/home/kim/catkin_ws/src/doosan-robot/dsr_launcher/scripts/sampled_trajectories/back_to_initial_trajectory/back_to_initial_trajectory.npz" , plan = back_to_initial_trajectory)
+    #np.savez("/home/kim/catkin_ws/src/doosan-robot/dsr_launcher/scripts/sampled_trajectories/back_to_initial_trajectory/back_to_initial_trajectory.npz" , plan = back_to_initial_trajectory)
     print("complete to save back_to_initial trajectory")
 
 
