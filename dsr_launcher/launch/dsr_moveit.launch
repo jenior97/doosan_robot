@@ -6,13 +6,13 @@
   <arg name="world" default="empty.world"/>  
   <arg name="ns"    default="dsr01"/>
   
-  <arg name="host" default="127.0.0.1"/>
-  <!-- <arg name="host" default="192.168.127.100"/> -->
+  <!--arg name="host" default="127.0.0.1"/-->
+  <arg name="host" default="192.168.127.100"/>
 
-  <arg name="mode" default="virtual"/>
-  <arg name="sim" default="true"/>
-  <!-- <arg name="mode" default="real"/> -->
-  <!-- <arg name="sim" default="true" in a simulation mode/> -->
+  <!-- <arg name="mode" default="virtual"/> -->
+  <!-- <arg name="sim" default="true"/> -->
+  <arg name="mode" default="real"/>
+  <arg name="sim" default="false" />
   
   <arg name="camera_use" default="false"/>
   <!-- <arg name="camera_use" default="false"/> -->

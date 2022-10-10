@@ -80,17 +80,17 @@ class control(object):
 
 
         #self.srv_robotiq_2f_move = rospy.ServiceProxy('/dsr01a0912/gripper/robotiq_2f_move', Robotiq2FMove)
-        #self.srv_robotiq_gripper_move = rospy.ServiceProxy('/robotiq_control_move', Robotiq2FMove)
+        self.srv_robotiq_gripper_move = rospy.ServiceProxy('/robotiq_control_move', Robotiq2FMove)
     
 
 #############################################################################################
 
-    #def gripper_control(self, value):
+    def gripper_control(self, value):
 
         # if value = 0.7 : open / value = 0 : close 
         
         #self.srv_robotiq_2f_move(0.7-value)
-        #self.srv_robotiq_gripper_move(0.7-value)
+        self.srv_robotiq_gripper_move(0.7-value)
 
 
 
@@ -135,11 +135,12 @@ class control(object):
 
     def joint_move(self, plan):
 
-        self.arm_move_group.plan(plan)
+        plan = self.arm_move_group.plan(plan)
         #self.arm_move_group.stop()
-
-        self.set_joint_state_to_neutral_pose(plan)
-        self._update_planning_scene(self.get_planning_scene)
+        self.arm_move_group.execute(plan)
+        
+        #self.set_joint_state_to_neutral_pose(plan)
+        #self._update_planning_scene(self.get_planning_scene)
 
 
 
@@ -158,7 +159,7 @@ class control(object):
         for i in range(len(plan.joint_trajectory.points)):
             plan_positions.append(plan.joint_trajectory.points[i].positions)
 
-        return plan_positions
+        return plan, plan_positions
         
 
 
@@ -261,7 +262,7 @@ class control(object):
         for i in range(len(plan.joint_trajectory.points)):
             plan_positions.append(plan.joint_trajectory.points[i].positions)
 
-        return plan_positions
+        return plan, plan_positions
 
 
 

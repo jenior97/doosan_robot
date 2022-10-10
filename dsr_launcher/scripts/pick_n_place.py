@@ -52,13 +52,11 @@ def main():
 
     pick_trajectory = list()
     pick_up_trajectory = list()
-
     
     place_trajectory = list()
     place_up_trajectory = list()
 
     back_to_initial_trajectory = list()
-
 
 
 
@@ -68,18 +66,18 @@ def main():
 
     ## initial_pose
 
-    plan = planning.initial_joint_pose()
+    p, plan = planning.initial_joint_pose()
     pick_trajectory = plan
     
     raw_input()
 
     ## pick
 
-    plan = planning.arm_cartesian_plan(object_pose = [0.7 , -0.3 , 0.3])
+    p, plan = planning.arm_cartesian_plan(object_pose = [0.7 , -0.3 , 0.3])
     pick_trajectory = pick_trajectory + plan
     raw_input()
 
-    plan = planning.arm_cartesian_plan(object_pose = [0.7 , -0.3 , 0.2])
+    p, plan = planning.arm_cartesian_plan(object_pose = [0.7 , -0.3 , 0.2])
     pick_trajectory = pick_trajectory + plan
     raw_input()
 
@@ -87,13 +85,15 @@ def main():
     ## close gripper
 
     #planning.attach_object(object = box)
-    raw_input()
-
+    #planning.gripper_control(value = 0.7)
+    #raw_input()
+    
     #planning.gripper_control(value = 0)
+    #planning.hold_hand(object = 'box')
 
     ## up
 
-    plan = planning.arm_cartesian_plan(object_pose = [0.75 , -0.3 , 0.4])
+    p, plan = planning.arm_cartesian_plan(object_pose = [0.75 , -0.3 , 0.4])
     pick_up_trajectory = plan
     raw_input()
 
@@ -101,15 +101,15 @@ def main():
     # save pick trajectory
 
     pick_trajectory = np.array(pick_trajectory , dtype=object)
-    
-    np.savez("/home/kim/catkin_ws/src/doosan-robot/dsr_launcher/scripts/sampled_trajectories/pick_trajectory/pick_trajectory.npz" , plan = pick_trajectory)
+
+    #np.savez("/home/kim/catkin_ws/src/doosan-robot/dsr_launcher/scripts/sampled_trajectories/pick_trajectory/pick_trajectory.npz" , plan = pick_trajectory)
     print("complete to save pick trajectory")
 
     # save pick_up trajectory
 
-    pick_up_trajectory = np.array(pick_up_trajectory , dtype=object)
-    
-    np.savez("/home/kim/catkin_ws/src/doosan-robot/dsr_launcher/scripts/sampled_trajectories/pick_up_trajectory/pick_up_trajectory.npz" , plan = pick_up_trajectory)
+    pick_up_trajectory = np.array(pick_up_trajectory , dtype=object)  
+
+    #np.savez("/home/kim/catkin_ws/src/doosan-robot/dsr_launcher/scripts/sampled_trajectories/pick_up_trajectory/pick_up_trajectory.npz" , plan = pick_up_trajectory)
     print("complete to save pick_up trajectory")
 
 
@@ -126,18 +126,18 @@ def main():
 
     mid_point = [0.516021273967, 0.0390030718983, 0.630885729686]
 
-    for i in range(1):
+    for i in range(1,201):
 
         mid_trajectory = list()
 
         random_pose = copy.deepcopy(mid_point)
-        random_pose[0] += np.random.uniform(-0.5,0.5)
+        random_pose[0] += np.random.uniform(-0.2,0.2)
         random_pose[1] += np.random.uniform(-0.4,-0.2)
         random_pose[2] += np.random.uniform(-0.4,0.3)
 
-        plan = planning.arm_cartesian_plan(object_pose = random_pose, approach_direction = 'vertical')
+        p, plan = planning.arm_cartesian_plan(object_pose = random_pose, approach_direction = 'vertical')
         mid_trajectory = plan
-        raw_input()
+        #raw_input()
 
 
         random_pose = copy.deepcopy(mid_point)
@@ -145,37 +145,37 @@ def main():
         random_pose[1] += np.random.uniform(-0.2,0.2)
         random_pose[2] += np.random.uniform(-0.4,0.3)
 
-        plan = planning.arm_cartesian_plan(object_pose = mid_point , approach_direction = 'vertical')
+        p, plan = planning.arm_cartesian_plan(object_pose = mid_point , approach_direction = 'vertical')
         mid_trajectory = mid_trajectory + plan
-        raw_input()
+        #raw_input()
 
 
         random_pose = copy.deepcopy(mid_point)
-        random_pose[0] += np.random.uniform(-0.3,0.5)
+        random_pose[0] += np.random.uniform(-0.2,0.2)
         random_pose[1] += np.random.uniform(0.2,0.4)
         random_pose[2] += np.random.uniform(-0.4,0.3)
 
-        plan = planning.arm_cartesian_plan(object_pose = random_pose, approach_direction = 'vertical')
+        p, plan = planning.arm_cartesian_plan(object_pose = random_pose, approach_direction = 'vertical')
         mid_trajectory = mid_trajectory + plan
-        raw_input()
+        #raw_input()
 
 
-        plan = planning.arm_cartesian_plan(object_pose = [0.75 , 0.3 , 0.4])
+        p, plan = planning.arm_cartesian_plan(object_pose = [0.75 , 0.3 , 0.4])
         mid_trajectory = mid_trajectory + plan
-        raw_input()
+        #raw_input()
 
 
         # save mid_trajectory
 
         mid_trajectory = np.array(mid_trajectory , dtype=object)
-    
+
         np.savez("/home/kim/catkin_ws/src/doosan-robot/dsr_launcher/scripts/sampled_trajectories/mid_trajectory/mid_trajectory_{num}.npz".format(num = i), plan=mid_trajectory)
         print("complete to save mid trajectory_{num}.npz".format(num = i))
 
 
         # arm should start back at pick_up_position
 
-        planning.arm_cartesian_plan(object_pose = [0.75 , -0.3 , 0.4])
+        #planning.arm_cartesian_plan(object_pose = [0.75 , -0.3 , 0.4])
 
 
 
@@ -183,11 +183,11 @@ def main():
 
     ## place
 
-    plan = planning.arm_cartesian_plan(object_pose = [0.7, 0.3, 0.3])
+    p, plan = planning.arm_cartesian_plan(object_pose = [0.7, 0.3, 0.3])
     place_trajectory = plan
     raw_input()
 
-    plan = planning.arm_cartesian_plan(object_pose = [0.7, 0.3, 0.2])
+    p, plan = planning.arm_cartesian_plan(object_pose = [0.7, 0.3, 0.2])
     place_trajectory = place_trajectory + plan    
     raw_input()
 
@@ -198,14 +198,15 @@ def main():
     ## open gripper
 
     #planning.detach_object(object = box)
-    raw_input()
+    #planning.gripper_control(value = 0)
 
+    #planning.release_hand(object = 'box')
     #planning.gripper_control(value = 0.7)
 
     
     ## up
 
-    plan = planning.arm_cartesian_plan(object_pose = [0.75 , 0.3 , 0.4])
+    p, plan = planning.arm_cartesian_plan(object_pose = [0.75 , 0.3 , 0.4])
     place_up_trajectory = plan
     raw_input()
 
@@ -235,15 +236,15 @@ def main():
     #planning.initial_joint_pose()
     #raw_input()
 
-    plan = planning.arm_cartesian_plan(object_pose = [0.516021273967, 0.0390030718983, 0.630885729686], approach_direction = [-4.88940814326e-05, -0.999999963883, 0.000231584538729, 0.00012732903351])
+    p, plan = planning.arm_cartesian_plan(object_pose = [0.516021273967, 0.0390030718983, 0.630885729686], approach_direction = [-4.88940814326e-05, -0.999999963883, 0.000231584538729, 0.00012732903351])
     back_to_initial_trajectory = plan
 
 
     # save back_to_initial trajectory
 
     back_to_initial_trajectory = np.array(back_to_initial_trajectory , dtype=object)
-    
-    #np.savez("/home/kim/catkin_ws/src/doosan-robot/dsr_launcher/scripts/sampled_trajectories/back_to_initial_trajectory/back_to_initial_trajectory.npz" , plan = back_to_initial_trajectory)
+
+    np.savez("/home/kim/catkin_ws/src/doosan-robot/dsr_launcher/scripts/sampled_trajectories/back_to_initial_trajectory/back_to_initial_trajectory.npz" , plan = back_to_initial_trajectory)
     print("complete to save back_to_initial trajectory")
 
 

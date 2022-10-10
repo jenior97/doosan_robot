@@ -247,12 +247,12 @@ def main():
 
         setup.clear()
 
-        alpha = 0.01
+        alpha = 0
 
         setup.add_box(position_x = alpha + 1.025, position_z = -0.465, size = (1.2,1.4,0.72), box_name = 'table') 
         print("============== Table in the scene ===============")
 
-        setup.add_box(position_x = alpha + 1.025, position_y = -0.3, position_z = -0.1, size = (0.1,0.1,0.1), box_name = 'box')
+        setup.add_box(position_x = alpha + 0.7, position_y = -0.3, position_z = -0.055, size = (0.1,0.1,0.1), box_name = 'box')
         print("============== Box in the scene ===============")
 
         setup.add_mesh(position_x = alpha + 1.025 , position_z = -0.055 , size = (0.1,0.1,0.1) , mesh_name = 'laptop')
@@ -261,8 +261,8 @@ def main():
         setup.add_mesh(position_x = 1.8 , position_z = -0.25 , orientation_x = -0.5, orientation_y = 0.5, orientation_z = 0.5, orientation_w = -0.5, size = (0.5,0.5,0.5) , mesh_name = 'visualhuman')
         print("============== Visualhuman in the scene ===============")
 
-
-
+        setup.add_box(position_y = 0.8, size = (5, 0.1, 3), box_name = 'wall')
+        print("============== Wall in the scene ===============")
 
 
 
